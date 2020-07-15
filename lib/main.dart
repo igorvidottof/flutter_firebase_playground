@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_firebase_playground/providers/products.dart';
+import 'package:provider/provider.dart';
+
 import './screens/products_screen.dart';
 
 void main() {
@@ -8,14 +11,21 @@ void main() {
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter Firebase Playground',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-        visualDensity: VisualDensity.adaptivePlatformDensity,
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(
+          create: (context) => Products(),
+        ),
+      ],
+      child: MaterialApp(
+        debugShowCheckedModeBanner: false,
+        title: 'Flutter Firebase Playground',
+        theme: ThemeData(
+          primarySwatch: Colors.blue,
+          visualDensity: VisualDensity.adaptivePlatformDensity,
+        ),
+        home: ProductsScreen(),
       ),
-      home: ProductsScreen(),
     );
   }
 }
-
