@@ -2,9 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../providers/products.dart';
-import '../widgets/product_item.dart';
+import '../widgets/product_grid_item.dart';
+import '../widgets/app_drawer.dart';
 
 class ProductsScreen extends StatefulWidget {
+  static const routeName = '/products';
+
   @override
   _ProductsScreenState createState() => _ProductsScreenState();
 }
@@ -13,19 +16,36 @@ class _ProductsScreenState extends State<ProductsScreen> {
   var _isInit = true;
   var _isLoading = false;
 
+  void _showErrorMessage() {
+    showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: Text('Something went wrong'),
+            content: Text('Failed to get data from the server'),
+            actions: <Widget>[
+              FlatButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: Text('Ok'),
+              ),
+            ],
+          );
+        });
+  }
+
   @override
   void didChangeDependencies() {
     if (_isInit) {
-      _isLoading = true;
-      try {
-        Provider.of<Products>(context, listen: false)
-            .fetchAndSetProducts()
-            .then((_) {
-          _isLoading = false;
-        });
-      } catch (error) {
-        print(error.toString());
-      }
+      setState(() {
+        _isLoading = true;
+      });
+
+      Provider.of<Products>(context, listen: false)
+          .fetchAndSetProducts()
+          .catchError((error) => _showErrorMessage())
+          .then((_) => setState(() {
+                _isLoading = false;
+              }));
     }
     _isInit = false;
     super.didChangeDependencies();
@@ -41,19 +61,22 @@ class _ProductsScreenState extends State<ProductsScreen> {
           IconButton(icon: Icon(Icons.shopping_cart), onPressed: () {}),
         ],
       ),
+      drawer: AppDrawer(),
       body: _isLoading
-          ? Container(
-            width: double.infinity,
-            child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: <Widget>[
-                  CircularProgressIndicator(),
-                  SizedBox(height: 15),
-                  Text('Loading products...'),
-                ],
+          ? SafeArea(
+              child: Container(
+                width: double.infinity,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: <Widget>[
+                    CircularProgressIndicator(),
+                    SizedBox(height: 15),
+                    Text('Loading products...'),
+                  ],
+                ),
               ),
-          )
+            )
           : SafeArea(
               child: GridView.builder(
                   padding: EdgeInsets.all(10),
@@ -65,7 +88,7 @@ class _ProductsScreenState extends State<ProductsScreen> {
                     mainAxisSpacing: 10,
                   ),
                   itemBuilder: (context, i) {
-                    return ProductItem(products[i]);
+                    return ProductGridItem(products[i]);
                   }),
             ),
     );

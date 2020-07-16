@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_firebase_playground/providers/products.dart';
 
-class ProductItem extends StatelessWidget {
+class ProductGridItem extends StatelessWidget {
   final Product product;
 
-  ProductItem(this.product);
+  ProductGridItem(this.product);
 
   @override
   Widget build(BuildContext context) {

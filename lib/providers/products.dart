@@ -22,16 +22,7 @@ class Product {
 }
 
 class Products with ChangeNotifier {
-  List<Product> _products = [
-    Product(
-      id: DateTime.now().toString(),
-      title: 'Book',
-      description: 'A nice book',
-      imageUrl:
-          'https://img.elo7.com.br/product/zoom/162DE0F/old-book-marrom-caderno-artesanal-secreto.jpg',
-      price: 8.90,
-    ),
-  ];
+  List<Product> _products = [];
 
   List<Product> getProducts() {
     return [..._products];

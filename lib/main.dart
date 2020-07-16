@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_firebase_playground/providers/products.dart';
+import 'package:flutter_firebase_playground/screens/manage_products_screens.dart';
 import 'package:provider/provider.dart';
 
 import './screens/products_screen.dart';
@@ -25,6 +26,10 @@ class MyApp extends StatelessWidget {
           visualDensity: VisualDensity.adaptivePlatformDensity,
         ),
         home: ProductsScreen(),
+        routes: {
+          ManageProductsScreen.routeName: (context) => ManageProductsScreen(),
+          ProductsScreen.routeName: (context) => ProductsScreen(),
+        },
       ),
     );
   }
