@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_firebase_playground/providers/products.dart';
+import 'package:flutter_firebase_playground/screens/edit_product_screen.dart';
 import 'package:flutter_firebase_playground/widgets/app_drawer.dart';
 import 'package:flutter_firebase_playground/widgets/product_list_item.dart';
 import 'package:provider/provider.dart';
@@ -14,7 +15,11 @@ class ManageProductsScreen extends StatelessWidget {
       appBar: AppBar(
         title: Text('Manage Products'),
         actions: <Widget>[
-          IconButton(icon: Icon(Icons.add), onPressed: () {}),
+          IconButton(
+            icon: Icon(Icons.add),
+            onPressed: () =>
+                Navigator.of(context).pushNamed(EditProductScreen.routeName),
+          ),
         ],
       ),
       drawer: AppDrawer(),

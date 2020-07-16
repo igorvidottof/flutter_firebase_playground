@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_firebase_playground/providers/products.dart';
+import 'package:flutter_firebase_playground/screens/edit_product_screen.dart';
 import 'package:flutter_firebase_playground/screens/manage_products_screens.dart';
 import 'package:provider/provider.dart';
 
@@ -29,6 +30,7 @@ class MyApp extends StatelessWidget {
         routes: {
           ManageProductsScreen.routeName: (context) => ManageProductsScreen(),
           ProductsScreen.routeName: (context) => ProductsScreen(),
+          EditProductScreen.routeName: (context) => EditProductScreen(),
         },
       ),
     );
