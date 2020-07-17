@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_firebase_playground/screens/manage_products_screens.dart';
-import 'package:flutter_firebase_playground/screens/products_screen.dart';
+
+import '../screens/products_screen.dart';
+import '../screens/manage_products_screens.dart';
 
 class AppDrawer extends StatelessWidget {
   @override

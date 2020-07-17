@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_firebase_playground/providers/products.dart';
+
+import '../providers/products.dart';
 
 class ProductGridItem extends StatelessWidget {
   final Product product;

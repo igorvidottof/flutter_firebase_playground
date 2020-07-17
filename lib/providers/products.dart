@@ -3,6 +3,8 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 
+import '../models/http_exception.dart';
+
 class Product {
   String id;
   String title;
@@ -19,6 +21,18 @@ class Product {
     this.price,
     this.isFavorite = false,
   });
+
+  // copy an object without referencing it
+  Product generateClone() {
+    return Product(
+      id: this.id,
+      title: this.title,
+      description: this.description,
+      imageUrl: this.imageUrl,
+      price: this.price,
+      isFavorite: this.isFavorite,
+    );
+  }
 }
 
 class Products with ChangeNotifier {
@@ -35,14 +49,16 @@ class Products with ChangeNotifier {
       final List<Product> loadedProducts = [];
       final extractedData = json.decode(response.body) as Map<String, dynamic>;
       extractedData.forEach((productId, product) {
-        loadedProducts.add(Product(
-          id: productId,
-          title: product['title'],
-          description: product['description'],
-          imageUrl: product['imageUrl'],
-          price: product['price'],
-          isFavorite: product['isFavorite'],
-        ));
+        loadedProducts.add(
+          Product(
+            id: productId,
+            title: product['title'],
+            description: product['description'],
+            imageUrl: product['imageUrl'],
+            price: product['price'],
+            isFavorite: product['isFavorite'],
+          ),
+        );
       });
       _products = loadedProducts;
       notifyListeners();
@@ -74,6 +90,31 @@ class Products with ChangeNotifier {
           imageUrl: product.imageUrl,
         ),
       );
+      notifyListeners();
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  Future<void> updateProduct(Product updatedProduct) async {
+    final url = '';
+    final productIndex =
+        _products.indexWhere((product) => product.id == updatedProduct.id);
+    try {
+      final response = await http.patch(
+        url,
+        body: json.encode({
+          'title': updatedProduct.title,
+          'price': updatedProduct.price,
+          'description': updatedProduct.description,
+          'imageUrl': updatedProduct.imageUrl,
+        }),
+      );
+      if (response.statusCode >= 400) {
+        throw HttpException(response.reasonPhrase);
+      }
+      // else isn't needed here because throw breaks the function
+      _products[productIndex] = updatedProduct;
       notifyListeners();
     } catch (error) {
       throw error;

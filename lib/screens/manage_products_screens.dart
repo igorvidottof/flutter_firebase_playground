@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_firebase_playground/providers/products.dart';
-import 'package:flutter_firebase_playground/screens/edit_product_screen.dart';
-import 'package:flutter_firebase_playground/widgets/app_drawer.dart';
-import 'package:flutter_firebase_playground/widgets/product_list_item.dart';
 import 'package:provider/provider.dart';
+
+import '../providers/products.dart';
+import '../widgets/app_drawer.dart';
+import '../widgets/product_list_item.dart';
+import './edit_product_screen.dart';
 
 class ManageProductsScreen extends StatelessWidget {
   static const routeName = '/manage-products';

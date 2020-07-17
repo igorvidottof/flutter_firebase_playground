@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_firebase_playground/providers/products.dart';
+
+import '../providers/products.dart';
+import '../screens/edit_product_screen.dart';
 
 class ProductListItem extends StatelessWidget {
   final Product product;
@@ -17,7 +19,9 @@ class ProductListItem extends StatelessWidget {
       trailing: Row(
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
-          IconButton(icon: Icon(Icons.edit), onPressed: () {}),
+          IconButton(icon: Icon(Icons.edit), onPressed: () {
+            Navigator.of(context).pushNamed(EditProductScreen.routeName, arguments: product);
+          }),
           IconButton(icon: Icon(Icons.delete), onPressed: () {}),
         ],
       ),

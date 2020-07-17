@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_firebase_playground/providers/products.dart';
 import 'package:provider/provider.dart';
+
+import '../providers/products.dart';
 
 class EditProductScreen extends StatefulWidget {
   static const routeName = '/edit-product';
@@ -14,38 +15,19 @@ class _EditProductScreenState extends State<EditProductScreen> {
   final _descriptionFocusNode = FocusNode();
   final _imageUrlFocusNode = FocusNode();
   final _form = GlobalKey<FormState>();
-  var _product = Product();
+  Product _product;
   var _isLoading = false;
+  var _isInit = true;
 
-  void _saveForm() async {
-    final isValid = _form.currentState.validate();
-    if (!isValid) return;
-    _form.currentState.save();
-    setState(() {
-      _isLoading = true;
-    });
-    try {
-      await Provider.of<Products>(context, listen: false).addProduct(_product);
-    } catch (error) {
-      await showDialog(
-          context: context,
-          builder: (context) {
-            return AlertDialog(
-              title: Text('Something went wrong'),
-              content: Text('Failed to save the product'),
-              actions: <Widget>[
-                FlatButton(
-                  onPressed: () => Navigator.of(context).pop(),
-                  child: Text('Ok'),
-                ),
-              ],
-            );
-          });
+
+  @override
+  void didChangeDependencies() {
+    if (_isInit) {
+      final _originalProduct = ModalRoute.of(context).settings.arguments as Product;
+      _product = _originalProduct == null ? Product() : _originalProduct.generateClone();
     }
-    setState(() {
-      _isLoading = false;
-    });
-    Navigator.of(context).pop();
+    _isInit = false;
+    super.didChangeDependencies();
   }
 
   @override
@@ -54,6 +36,53 @@ class _EditProductScreenState extends State<EditProductScreen> {
     _descriptionFocusNode.dispose();
     _imageUrlFocusNode.dispose();
     super.dispose();
+  }
+
+  Future<void> _showErrorMessage() async {
+    await showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: Text('Something went wrong'),
+            content: Text('Failed to save the product'),
+            actions: <Widget>[
+              FlatButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: Text('OK'),
+              ),
+            ],
+          );
+        });
+  }
+
+  void _saveForm() async {
+    final isValid = _form.currentState.validate();
+    if (!isValid) return;
+    _form.currentState.save();
+    setState(() {
+      _isLoading = true;
+    });
+    if (_product.id != null) {
+      try {
+        await Provider.of<Products>(context, listen: false)
+            .updateProduct(_product);
+      } catch (error) {
+        await _showErrorMessage();
+      }
+    } else {
+      try {
+        await Provider.of<Products>(context, listen: false)
+            .addProduct(_product);
+      } catch (error) {
+        await _showErrorMessage();
+      }
+    }
+    setState(() {
+      // free from memory
+      _product = null;
+      _isLoading = false;
+    });
+    Navigator.of(context).pop();
   }
 
   @override
@@ -89,7 +118,8 @@ class _EditProductScreenState extends State<EditProductScreen> {
                     child: Column(
                       children: <Widget>[
                         TextFormField(
-                          initialValue: '',
+                          initialValue:
+                              _product?.title == null ? '' : _product.title,
                           decoration: InputDecoration(labelText: 'Title'),
                           autofocus: true,
                           keyboardType: TextInputType.text,
@@ -104,7 +134,9 @@ class _EditProductScreenState extends State<EditProductScreen> {
                           onSaved: (title) => _product.title = title,
                         ),
                         TextFormField(
-                          initialValue: '',
+                          initialValue: _product?.price == null
+                              ? ''
+                              : _product.price.toStringAsFixed(2),
                           decoration: InputDecoration(labelText: 'Price'),
                           textInputAction: TextInputAction.next,
                           keyboardType: TextInputType.number,
@@ -123,7 +155,9 @@ class _EditProductScreenState extends State<EditProductScreen> {
                               _product.price = double.parse(price),
                         ),
                         TextFormField(
-                          initialValue: '',
+                          initialValue: _product?.description == null
+                              ? ''
+                              : _product.description,
                           decoration: InputDecoration(labelText: 'Description'),
                           maxLines: 3,
                           textCapitalization: TextCapitalization.sentences,
@@ -140,7 +174,9 @@ class _EditProductScreenState extends State<EditProductScreen> {
                               _product.description = description,
                         ),
                         TextFormField(
-                          initialValue: '',
+                          initialValue: _product?.imageUrl == null
+                              ? ''
+                              : _product.imageUrl,
                           decoration: InputDecoration(labelText: 'Image Url'),
                           keyboardType: TextInputType.url,
                           textInputAction: TextInputAction.done,
