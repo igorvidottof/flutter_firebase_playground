@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../providers/products.dart';
+import '../widgets/error_dialog.dart';
 
 class EditProductScreen extends StatefulWidget {
   static const routeName = '/edit-product';
@@ -42,16 +43,7 @@ class _EditProductScreenState extends State<EditProductScreen> {
     await showDialog(
         context: context,
         builder: (context) {
-          return AlertDialog(
-            title: Text('Something went wrong'),
-            content: Text('Failed to save the product'),
-            actions: <Widget>[
-              FlatButton(
-                onPressed: () => Navigator.of(context).pop(),
-                child: Text('OK'),
-              ),
-            ],
-          );
+          return ErrorDialog('Failed to save the product');
         });
   }
 

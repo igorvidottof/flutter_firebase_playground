@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../providers/products.dart';
 import '../widgets/product_grid_item.dart';
 import '../widgets/app_drawer.dart';
+import '../widgets/error_dialog.dart';
 
 class ProductsScreen extends StatefulWidget {
   static const routeName = '/products';
@@ -20,17 +21,16 @@ class _ProductsScreenState extends State<ProductsScreen> {
     showDialog(
         context: context,
         builder: (context) {
-          return AlertDialog(
-            title: Text('Something went wrong'),
-            content: Text('Failed to get data from the server'),
-            actions: <Widget>[
-              FlatButton(
-                onPressed: () => Navigator.of(context).pop(),
-                child: Text('Ok'),
-              ),
-            ],
-          );
+          return ErrorDialog('Failed to get products from the server');
         });
+  }
+
+  Future<void> _refreshProducts(BuildContext context) async {
+    try {
+      await Provider.of<Products>(context, listen: false).fetchAndSetProducts();
+    } catch (error) {
+      _showErrorMessage();
+    }
   }
 
   @override
@@ -77,19 +77,22 @@ class _ProductsScreenState extends State<ProductsScreen> {
                 ),
               ),
             )
-          : SafeArea(
-              child: GridView.builder(
-                  padding: EdgeInsets.all(10),
-                  itemCount: products.length,
-                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
-                    childAspectRatio: 3 / 2,
-                    crossAxisSpacing: 10,
-                    mainAxisSpacing: 10,
-                  ),
-                  itemBuilder: (context, i) {
-                    return ProductGridItem(products[i]);
-                  }),
+          : RefreshIndicator(
+              onRefresh: () => _refreshProducts(context),
+              child: SafeArea(
+                child: GridView.builder(
+                    padding: EdgeInsets.all(10),
+                    itemCount: products.length,
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 2,
+                      childAspectRatio: 3 / 2,
+                      crossAxisSpacing: 10,
+                      mainAxisSpacing: 10,
+                    ),
+                    itemBuilder: (context, i) {
+                      return ProductGridItem(products[i]);
+                    }),
+              ),
             ),
     );
   }
