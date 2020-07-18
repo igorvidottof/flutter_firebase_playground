@@ -42,6 +42,31 @@ class Products with ChangeNotifier {
     return [..._products];
   }
 
+  Product getProductById(String id) {
+    return _products.firstWhere((product) => product.id == id);
+  }
+
+  Future<void> toggleFavoriteProduct(String id) async {
+    final url = '';
+    // optimistic updating
+    var product = getProductById(id);
+    final oldStatus = product.isFavorite;
+    product.isFavorite = !product.isFavorite;
+    notifyListeners();
+    final response = await http.patch(
+      url,
+      body: json.encode({
+        'isFavorite': product.isFavorite,
+      }),
+    );
+    if (response.statusCode >= 400) {
+      // revert the operation
+      product.isFavorite = oldStatus;
+      notifyListeners();
+      throw HttpException(response.reasonPhrase);
+    }
+  }
+
   Future<void> fetchAndSetProducts() async {
     const url = '';
     try {
@@ -100,24 +125,40 @@ class Products with ChangeNotifier {
     final url = '';
     final productIndex =
         _products.indexWhere((product) => product.id == updatedProduct.id);
-    try {
-      final response = await http.patch(
-        url,
-        body: json.encode({
-          'title': updatedProduct.title,
-          'price': updatedProduct.price,
-          'description': updatedProduct.description,
-          'imageUrl': updatedProduct.imageUrl,
-        }),
-      );
-      if (response.statusCode >= 400) {
-        throw HttpException(response.reasonPhrase);
-      }
-      // else isn't needed here because throw breaks the function
-      _products[productIndex] = updatedProduct;
-      notifyListeners();
-    } catch (error) {
-      throw error;
+
+    final response = await http.patch(
+      url,
+      body: json.encode({
+        'title': updatedProduct.title,
+        'price': updatedProduct.price,
+        'description': updatedProduct.description,
+        'imageUrl': updatedProduct.imageUrl,
+      }),
+    );
+    if (response.statusCode >= 400) {
+      throw HttpException(response.reasonPhrase);
     }
+    // else isn't needed here because throw breaks the function
+    _products[productIndex] = updatedProduct;
+    notifyListeners();
+  }
+
+  Future<void> deleteProduct(String id) async {
+    // optimistic deleting
+    final url = '';
+    final productIndex = _products.indexWhere((product) => product.id == id);
+    // points to a reference of the removed object
+    var removedProduct = _products[productIndex];
+    _products.removeAt(productIndex);
+    notifyListeners();
+
+    final response = await http.delete(url);
+    if (response.statusCode >= 400) {
+      _products.insert(productIndex, removedProduct);
+      notifyListeners();
+      throw HttpException(response.reasonPhrase);
+    }
+    // free from memory
+    removedProduct = null;
   }
 }
